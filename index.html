@@ -70,7 +70,7 @@
     .btn-submit {
       width: 100%;
       padding: 13px;
-      background-color: #7A3E3E; /* Warna cokelat sesuai tema SEMURA */
+      background-color: #7A3E3E;
       color: white;
       border: none;
       border-radius: 10px;
@@ -148,18 +148,28 @@
 <body>
 
 <div class="container">
-  <!-- Logo SEMURA (Sesuaikan nama file gambar jika berbeda) -->
   <img src="logo.png" alt="SEMURA Logo" class="logo" onerror="this.style.display='none'">
   
   <h2>Cek Pesanan</h2>
-  <div class="subtitle">Masukkan kode grup atau nomor whatsapp</div>
+  <div class="subtitle">Masukkan kode grup dan nama pemesan</div>
 
+  <!-- Input Kode Grup -->
   <div class="form-group">
-    <label for="inputCari">Kode Grup / Nomor WhatsApp</label>
+    <label for="kodeGrup">Kode Grup</label>
     <input 
       type="text" 
-      id="inputCari" 
-      placeholder="Contoh: G3 atau 081234567890" 
+      id="kodeGrup" 
+      placeholder="Contoh: G1/G2/G3"
+    >
+  </div>
+
+  <!-- Input Nama Pemesan -->
+  <div class="form-group">
+    <label for="namaPemesan">Nama Pemesan</label>
+    <input 
+      type="text" 
+      id="namaPemesan" 
+      placeholder="Masukkan nama sesuai pesanan" 
       onkeypress="handleKeyPress(event)"
     >
   </div>
@@ -183,7 +193,7 @@
 </div>
 
 <script>
-  // PASTE URL WEB APP GOOGLE APPS SCRIPT KAMU DI BAWAH INI
+  // Ganti dengan URL Web App Apps Script kamu
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1OQ5ff3qb7B8M-1zNgz38HZ8oHTUEjMv2b8LUZUIqjg6w9VEQqMcn1FDhzzF-ZujJoQ/exec";
 
   function handleKeyPress(event) {
@@ -193,14 +203,18 @@
   }
 
   async function cariPesanan() {
-    const keyword = document.getElementById('inputCari').value.trim();
+    const kodeGrupInput = document.getElementById('kodeGrup').value.trim();
+    const namaInput = document.getElementById('namaPemesan').value.trim();
     const hasilContainer = document.getElementById('hasilPencarian');
     const loading = document.getElementById('loading');
 
-    if (!keyword) {
-      alert("Masukkan Kode Grup atau Nomor WhatsApp terlebih dahulu!");
+    if (!kodeGrupInput && !namaInput) {
+      alert("Masukkan Kode Grup atau Nama Pemesan terlebih dahulu!");
       return;
     }
+
+    // Mengambil kata kunci pencarian
+    const keyword = kodeGrupInput || namaInput;
 
     hasilContainer.innerHTML = "";
     loading.style.display = "block";
@@ -211,8 +225,8 @@
 
       loading.style.display = "none";
 
-      if (data.length === 0) {
-        hasilContainer.innerHTML = <div style="text-align:center; color:#888; font-size:13px; margin-top:15px;">Data tidak ditemukan. Pastikan Kode Grup atau Nomor WA sudah sesuai.</div>;
+      if (!data || data.length === 0) {
+        hasilContainer.innerHTML = <div style="text-align:center; color:#888; font-size:13px; margin-top:15px;">Data tidak ditemukan. Pastikan Kode Grup atau Nama sudah sesuai.</div>;
         return;
       }
 
@@ -224,15 +238,15 @@
 
         const htmlCard = `
           <div class="card">
-            <div class="card-title">📖 ${item.judulBuku || '-'}</div>
-            <div class="card-row"><span>Nama Pemesan:</span> <strong>${item.namaPemesan || '-'}</strong></div>
+            <div class="card-title">📖 ${item.judulBuku || item.judul || '-'}</div>
+            <div class="card-row"><span>Nama Pemesan:</span> <strong>${item.namaPemesan || item.nama || '-'}</strong></div>
             <div class="card-row"><span>Kode Grup:</span> <strong>${item.kodeGrup || '-'}</strong></div>
             <div class="card-row"><span>Hari Ke-:</span> <span>${item.hariKe || '-'}</span></div>
             <div class="card-row"><span>Harga:</span> <span>Rp ${item.harga || 0}</span></div>
             <div class="card-row"><span>Kuantitas:</span> <span>${item.kuantitas || 0}</span></div>
             <div class="card-row"><span>Jumlah:</span> <strong>Rp ${item.jumlah || 0}</strong></div>
             <div class="card-row"><span>Status Bayar:</span> ${statusBadge}</div>
-            <div class="card-row"><span>Status Pengiriman:</span> <strong>${item.statusPengiriman || '-'}</strong></div>
+            <div class="card-row"><span>Status Pengiriman:</span> <strong>${item.statusPengiriman || item.status || '-'}</strong></div>
           </div>
         `;
         hasilContainer.innerHTML += htmlCard;
