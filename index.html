@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FFF7F5">
+
+  <title>SEMURA - Cek Pesanan</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #FFF7F5;
+      background-image:
+        radial-gradient(circle at 8% 5%, rgba(232,199,205,.45), transparent 22%),
+        radial-gradient(circle at 94% 20%, rgba(239,211,218,.45), transparent 22%),
+        radial-gradient(circle at 5% 95%, rgba(232,199,205,.32), transparent 24%),
+        linear-gradient(145deg, #FFF7F5 0%, #FFFAFA 50%, #FFF4F4 100%);
+      background-attachment: fixed;
+      background-size: cover;
+      font-size: 16px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      color: #6F5B5F;
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px 40px;
+      position: relative;
+    }
+
+    .stage {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin: auto 0;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .decor {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+      font-size: 1.4rem;
+      user-select: none;
+      opacity: 0.6;
+    }
+    .d1 { top: 5%; left: 8%; animation: floaty 4s ease-in-out infinite; }
+    .d2 { top: 12%; right: 10%; animation: floaty 5s ease-in-out infinite 1s; }
+    .d3 { bottom: 15%; left: 6%; animation: floaty 4.5s ease-in-out infinite 0.5s; }
+    .d4 { bottom: 8%; right: 8%; animation: floaty 6s ease-in-out infinite 1.5s; }
+
+    .logo-wrap { width: 100%; display: flex; justify-content: center; }
+    .logo { 
+      width: 180px; 
+      max-width: 60%; 
+      height: auto; 
+      filter: drop-shadow(0 10px 16px rgba(151,101,111,.13));
+      animation: pulseSoft 3.5s ease-in-out infinite;
+    }
+
+    .order-card, .result {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 20px;
+      padding: 24px 20px;
+      box-shadow: 0 14px 32px rgba(157, 104, 116, 0.12);
+    }
+
+    .title { margin: 0; text-align: center; font-family: "Fredoka", sans-serif; font-size: 1.6rem; color: #715D61; }
+    .subtitle { margin: 6px 0 20px; text-align: center; font-size: 0.85rem; color: #AA9297; }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; margin: 0 0 6px 2px; font-size: 0.82rem; font-weight: 600; color: #816B70; }
+    .field input {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px;
+      border: 1px solid #EADDE0;
+      border-radius: 12px;
+      background: #FFFDFD;
+      outline: none;
+      color: #6F5B5F;
+      font-size: 0.95rem;
+    }
+    .field input:focus { border-color: #CF9CA8; box-shadow: 0 0 0 3px rgba(207,156,168,.18); }
+
+    .btn {
+      width: 100%;
+      height: 46px;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #C98594, #B97686);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(185,118,134,.24);
+    }
+
+    .loading { display: none; text-align: center; margin-top: 12px; font-size: 0.85rem; color: #AA9297; animation: pulseSoft 1.2s infinite; }
+    .error { display: none; margin-top: 12px; padding: 10px; border-radius: 8px; background: #FFF1F2; color: #B76F7B; font-size: 0.82rem; text-align: center; }
+
+    .result { display: none; margin-top: 12px; animation: fadeInUp 0.5s ease-out; }
+    .result-header { text-align: center; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 2px dashed #F2E3E6; }
+    .result-title { font-family: "Fredoka", sans-serif; font-size: 1.35rem; color: #715D61; }
+    .customer-name { font-size: 0.88rem; color: #9C8287; font-weight: 600; margin-top: 2px; }
+
+    .order-item { 
+      background: #FFFDFD;
+      border: 1px solid #F3ECEE;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 10px rgba(185, 118, 134, 0.05);
+    }
+    .book-title { font-size: 0.92rem; font-weight: 700; color: #5E4A4E; line-height: 1.35; margin-bottom: 8px; }
+    .item-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: #A18A8F; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #F8F1F3; }
+    .item-price { font-weight: 700; color: #B87585; }
+    .status-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; margin-top: 4px; }
+    .status-label { color: #A4878D; font-weight: 500; }
+
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: #FEEFEF; color: #D96B7D; }
+    .badge-done { background: #E8F5E9 !important; color: #2E7D32 !important; }
+    .badge-info { background: #F0F4FF !important; color: #3B82F6 !important; }
+
+    .total-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #FFF4F5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .total-label { font-size: 0.82rem; color: #A4878D; font-weight: 600; }
+    .total-value { font-family: "Fredoka", sans-serif; font-size: 1.25rem; color: #B87585; }
+
+    .payment-box {
+      margin-top: 16px;
+      padding: 16px 14px;
+      background: #FFF9FA;
+      border: 1px dashed #E2C2C9;
+      border-radius: 14px;
+      text-align: center;
+      animation: fadeInUp 0.4s ease-out;
+    }
+    .payment-title { font-size: 0.8rem; font-weight: 700; color: #806B70; margin-bottom: 8px; }
+    .bank-logo-wrap { display: flex; justify-content: center; align-items: center; margin: 10px 0 6px; }
+    .bank-logo { height: 36px; width: auto; object-fit: contain; }
+    .rekening-num { font-family: "Fredoka", sans-serif; font-size: 1.2rem; color: #B87585; letter-spacing: 1px; margin: 4px 0 2px; }
+    .rekening-owner { font-size: 0.75rem; color: #A4878D; margin-bottom: 12px; }
+    
+    .btn-copy {
+      background: #FFF;
+      border: 1px solid #D6A5B1;
+      color: #B87585;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-wa-confirm {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      height: 42px;
+      margin-top: 12px;
+      background: #25D366;
+      color: #FFF;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(37,211,102,.2);
+    }
+
+    .benefits { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .benefit { padding: 10px 6px; border-radius: 12px; background: rgba(255,255,255,.65); border: 1px solid rgba(255,255,255,.85); text-align: center; }
+    .benefit-title { font-family: "Fredoka", sans-serif; font-size: 0.75rem; color: #806B70; }
+    .benefit-text { font-size: 0.65rem; color: #B09B9F; }
+    .footer { text-align: center; color: #AD979B; font-size: 0.72rem; line-height: 1.4; opacity: .9; }
+  </style>
+</head>
+
+<body>
+  <div class="decor d1">🌸</div>
+  <div class="decor d2">✨</div>
+  <div class="decor d3">🎀</div>
+  <div class="decor d4">💖</div>
+
+  <main class="page">
+    <section class="stage">
+      <div class="logo-wrap">
+        <img class="logo" src="https://drive.google.com/thumbnail?id=1WqeS39kJveRSuLSDBHDVlKtsAaLUiWVR&sz=w800" alt="SEMURA">
+      </div>
+
+      <div class="order-card">
+        <h1 class="title">Cek Pesanan</h1>
+        <p class="subtitle">Masukkan kode grup dan nama pemesan</p>
+
+        <div class="field">
+          <label for="kode">Kode Grup</label>
+          <input id="kode" type="text" placeholder="Contoh: SEMURA01">
+        </div>
+
+        <div class="field">
+          <label for="nama">Nama Pemesan</label>
+          <input id="nama" type="text" placeholder="Masukkan nama sesuai pesanan">
+        </div>
+
+        <button class="btn" id="cekBtn" type="button" onclick="cekPesanan()">SUBMIT</button>
+
+        <div class="loading" id="loading">Sedang mencari pesanan...</div>
+        <div class="error" id="error"></div>
+      </div>
+
+      <div class="result" id="result">
+        <div class="result-header">
+          <div class="result-title">Pesanan Ditemukan 💗</div>
+          <div class="customer-name" id="customerName"></div>
+        </div>
+        
+        <div id="orderList"></div>
+
+        <div class="total-box">
+          <span class="total-label">Total Pesanan</span>
+          <span class="total-value" id="totalValue"></span>
+        </div>
+
+        <div class="payment-box" id="paymentBox" style="display: none;">
+          <div class="payment-title">💳 Transfer Pembayaran via BCA</div>
+          <div class="bank-logo-wrap">
+            <img class="bank-logo" src="https://drive.google.com/thumbnail?id=1hW1PAp4hcGlf75o0knAeGvQuCTKSy5Az&sz=w800" alt="Logo BCA">
+          </div>
+          <div class="rekening-num" id="noRek">0154739978</div>
+          <div class="rekening-owner" id="ownerName">a.n. Natasya A</div>
+          <button class="btn-copy" id="copyRekBtn" onclick="salinRekening()">📋 Salin No. Rekening</button>
+
+          <a class="btn-wa-confirm" id="waConfirmBtn" href="#" target="_blank">
+            💬 Konfirmasi Pembayaran via WA
+          </a>
+        </div>
+      </div>
+
+      <div class="benefits">
+        <div class="benefit">
+          <div class="benefit-title">Mudah Dicek</div>
+          <div class="benefit-text">Cek cepat</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-title">Aman</div>
+          <div class="benefit-text">Data terjaga</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-title">Praktis</div>
+          <div class="benefit-text">Tanpa ribet</div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <strong>SEMURA</strong> · Baby & Mom<br>
+        © 2026 SEMURA · Since 2022
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    // GANTI TEKS DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT-MU:
+    var URL_WEB_APP_GS = "https://script.google.com/macros/s/AKfycbzT2TzOUKUBz3EEh0chmX39bKdFkIOceqgnh9tNmdjUv12vTcm8oR26FT2KOZFbk2Oyyg/exec";
+
+    var NO_REKENING_BCA = "0154739978";
+    var NAMA_PEMILIK_BCA = "a.n. Natasya A";
+    var NO_WA_ADMIN = "6282115465899";
+
+    function cekPesanan() {
+      var kodeInput = document.getElementById("kode");
+      var namaInput = document.getElementById("nama");
+      var cekBtn = document.getElementById("cekBtn");
+      var loading = document.getElementById("loading");
+      var errorBox = document.getElementById("error");
+      var result = document.getElementById("result");
+      var paymentBox = document.getElementById("paymentBox");
+
+      var kode = kodeInput.value.trim();
+      var nama = namaInput.value.trim();
+
+      errorBox.style.display = "none";
+      result.style.display = "none";
+      paymentBox.style.display = "none";
+
+      if (!kode || !nama) {
+        errorBox.textContent = "Kode grup dan nama pemesan wajib diisi.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      loading.style.display = "block";
+      cekBtn.disabled = true;
+      cekBtn.textContent = "MENCARI...";
+
+      var fullUrl = URL_WEB_APP_GS + "?kode=" + encodeURIComponent(kode) + "&nama=" + encodeURIComponent(nama);
+
+      fetch(fullUrl)
+        .then(function(res) { return res.json(); })
+        .then(function(response) {
+          loading.style.display = "none";
+          cekBtn.disabled = false;
+          cekBtn.textContent = "SUBMIT";
+
+          if (!response || !response.success) {
+            errorBox.textContent = (response && response.message) ? response.message : "Pesanan tidak ditemukan.";
+            errorBox.style.display = "block";
+            return;
+          }
+
+          document.getElementById("customerName").textContent = response.data[0].namaPemesan;
+          var list = document.getElementById("orderList");
+          list.innerHTML = "";
+
+          var adaYangBelumLunas = false;
+
+          response.data.forEach(function(item) {
+            var stBayar = String(item.statusPembayaran || "").trim();
+            var stKirim = String(item.statusPengiriman || "").trim();
+
+            var isBayarDone = ['done', 'lunas', 'selesai'].includes(stBayar.toLowerCase());
+            var isKirimDone = ['done', 'terkirim', 'selesai'].includes(stKirim.toLowerCase());
+
+            if (!isBayarDone) {
+              adaYangBelumLunas = true;
+            }
+
+            var badgeBayarClass = isBayarDone ? "badge badge-done" : "badge";
+            var badgeKirimClass = isKirimDone ? "badge badge-done" : "badge badge-info";
+
+            var div = document.createElement("div");
+            div.className = "order-item";
+            div.innerHTML = `
+              <div class="book-title">📖 ${item.judulBuku}</div>
+              <div class="item-meta">
+                <span>Qty: <strong>${item.qty}</strong></span>
+                <span class="item-price">${formatRupiah(item.harga)}</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">Status Bayar</span>
+                <span class="${badgeBayarClass}">${stBayar || 'Belum Bayar'}</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">Pengiriman</span>
+                <span class="${badgeKirimClass}">${stKirim || 'Diproses'}</span>
+              </div>
+            `;
+            list.appendChild(div);
+          });
+
+          var totalText = formatRupiah(response.totalSemua);
+          document.getElementById("totalValue").textContent = totalText;
+
+          if (adaYangBelumLunas) {
+            document.getElementById("noRek").textContent = NO_REKENING_BCA;
+            document.getElementById("ownerName").textContent = NAMA_PEMILIK_BCA;
+
+            var waPesan = encodeURIComponent(
+              "Halo Admin SEMURA, saya mau konfirmasi pembayaran pesanan:\n" +
+              "- Nama: " + response.data[0].namaPemesan + "\n" +
+              "- Kode Grup: " + kode + "\n" +
+              "- Total: " + totalText + "\n" +
+              "- Pembayaran via: Bank BCA\n\nMohon dicek ya Kak. Terima kasih!"
+            );
+
+            document.getElementById("waConfirmBtn").href = "https://wa.me/" + NO_WA_ADMIN + "?text=" + waPesan;
+            paymentBox.style.display = "block";
+          }
+
+          result.style.display = "block";
+        })
+        .catch(function(err) {
+          loading.style.display = "none";
+          cekBtn.disabled = false;
+          cekBtn.textContent = "SUBMIT";
+          errorBox.textContent = "Gagal terhubung ke server.";
+          errorBox.style.display = "block";
+        });
+    }
+
+    function salinRekening() {
+      var copyBtn = document.getElementById("copyRekBtn");
+      navigator.clipboard.writeText(NO_REKENING_BCA).then(function() {
+        copyBtn.textContent = "✓ No. Rekening BCA Tersalin!";
+        setTimeout(function() {
+          copyBtn.textContent = "📋 Salin No. Rekening";
+        }, 2000);
+      });
+    }
+
+    function formatRupiah(value) {
+      var number = Number(String(value).replace(/[^\d]/g, "")) || 0;
+      return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(number);
+    }
+  </script>
+</body>
+</html>
